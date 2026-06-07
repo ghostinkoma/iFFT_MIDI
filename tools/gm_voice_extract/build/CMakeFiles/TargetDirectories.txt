@@ -1,0 +1,4 @@
+D:/hobby/midi/gm_voice_extract/build/CMakeFiles/gm_extract.dir
+D:/hobby/midi/gm_voice_extract/build/CMakeFiles/INSTALL.dir
+D:/hobby/midi/gm_voice_extract/build/CMakeFiles/ALL_BUILD.dir
+D:/hobby/midi/gm_voice_extract/build/CMakeFiles/ZERO_CHECK.dir

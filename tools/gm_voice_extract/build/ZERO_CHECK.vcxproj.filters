@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="D:\hobby\midi\gm_voice_extract\build\CMakeFiles\4ef1cede54d65ed72dd1f85d88914ea8\generate.stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{634F74A8-8B10-38EA-8503-CEC3E8DF122D}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
