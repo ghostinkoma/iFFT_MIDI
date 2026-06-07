@@ -1,4 +1,4 @@
-# RP2040 GM iFFT Synth Project
+# iFFT MIDI 
 
 RP2040上で動作する、GM互換MIDI再生システムです。  
 SoundFont（GeneralUser GS）から生成した倍音データを用い、iFFTベースの音源合成を行います。
