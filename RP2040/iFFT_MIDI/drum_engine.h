@@ -9,7 +9,7 @@
 #include <Arduino.h>
 
 #ifndef DRUM_VOICES
-#define DRUM_VOICES 32
+#define DRUM_VOICES 48
 #endif
 
 // 同一ノートあたりの最大同時発音数
