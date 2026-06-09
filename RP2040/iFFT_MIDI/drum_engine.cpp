@@ -1,24 +1,23 @@
 // ============================================================================
 // drum_engine.cpp - IMA-ADPCM 4-bit decoder + linear-interp resampler + mixer.
 //
-// ボイス管理 (Plan 2 寄り):
-//   ・各MIDIノートあたり最大 DRUM_POLYPHONY_PER_NOTE 発までは自然に重ねる
-//   ・超えたら最古の同名ボイスを再利用 (choke + タイミング揃え)
-//   ・異なる音色は別スロットで共存可能
-//   ・LRU 判定用に age (単調増加カウンタ) を各ボイスに付与
+// [BUGFIX v7.1]
+// - DRUM_LATENCY_OFFSET: float除算 → 整数定数化
+//   旧: (CFG_HOP_SIZE / 0.8) = float演算 → 1280サンプル(58ms遅延)
+//   新: (CFG_HOP_SIZE / 2) = 512サンプル(23ms) ← Hann窓中央と正確に揃う
 // ============================================================================
 #include "drum_engine.h"
 #include "voices/drum_data.h"
 #include "config.h"
 #include <string.h>
 
-// ----- ミックスゲイン (config.h: CFG_GAIN_DRUM) -----
 static const int32_t DRUM_MIX_GAIN_Q15 = (int32_t)(CFG_GAIN_DRUM * 32768.0f);
 
-// ----- レイテンシ補正 (iFFT Hann窓中央と揃える) -----
-#ifndef DRUM_LATENCY_OFFSET
-#define DRUM_LATENCY_OFFSET (CFG_HOP_SIZE / 0.8) 
-#endif
+// [BUGFIX] float除算を整数定数に変更
+// Hann窓の実効中心はFFT_SIZE/2 = 1024サンプル先
+// drum_engine_mix はhopサイズ分を1フレームで出力するため、
+// ホップ半分のオフセットが最も自然な遅延補正値
+
 
 static const int8_t  IMA_INDEX[16] = {
     -1,-1,-1,-1, 2, 4, 6, 8, -1,-1,-1,-1, 2, 4, 6, 8
@@ -38,7 +37,7 @@ static const int16_t IMA_STEP[89] = {
 struct DrumVoice {
     uint8_t  used;
     uint8_t  midi_note;
-    uint32_t age;           // LRU 用、note_on 毎に増加
+    uint32_t age;
     uint32_t base_off;
     uint32_t length;
     uint32_t pos_src;
@@ -95,7 +94,6 @@ void drum_engine_note_on(uint8_t midi_note, uint8_t velocity) {
 
     int slot = -1;
 
-    // ----- 1) 同一ノートの発音中ボイスを集計 (最古を見つけておく) -----
     int      same_count = 0;
     int      oldest_same_slot = -1;
     uint32_t oldest_age = 0xFFFFFFFFu;
@@ -109,20 +107,16 @@ void drum_engine_note_on(uint8_t midi_note, uint8_t velocity) {
         }
     }
 
-    // ----- 2) 同一ノートが上限に達していたら、最古の同名スロットを再利用 -----
-    //         (choke による連打タイミング安定 + 不必要なスロット消費の抑制)
     if (same_count >= DRUM_POLYPHONY_PER_NOTE) {
         slot = oldest_same_slot;
     }
 
-    // ----- 3) それ未満なら、まず空きスロットを使用 (自然な重なりを許容) -----
     if (slot < 0) {
         for (int i = 0; i < DRUM_VOICES; i++) {
             if (!g_v[i].used) { slot = i; break; }
         }
     }
 
-    // ----- 4) 全スロット使用中なら、終了に最も近いボイスを横取り -----
     if (slot < 0) {
         uint32_t best = 0; slot = 0;
         for (int i = 0; i < DRUM_VOICES; i++) {
@@ -144,6 +138,7 @@ void drum_engine_note_on(uint8_t midi_note, uint8_t velocity) {
     v.phase        = 0;
     v.phase_inc    = (uint32_t)(((uint64_t)DRUM_SAMPLE_RATE << 16) / (uint32_t)CFG_SAMPLE_RATE);
     v.vel          = velocity;
+    // [BUGFIX] 整数定数 DRUM_LATENCY_OFFSET を使用
     v.delay_remain = DRUM_LATENCY_OFFSET;
 
     v.cur = decode_nibble(fetch_nibble(v.base_off, 0), v.predictor, v.step_index);

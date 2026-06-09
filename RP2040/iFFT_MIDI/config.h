@@ -4,15 +4,16 @@
 // ================================================================
 #include <Arduino.h>
 
-#define CFG_SAMPLE_RATE     22050U
-#define CFG_MAX_POLYPHONY   128
+#define CFG_SAMPLE_RATE     24000U
+#define CFG_MAX_POLYPHONY   256
 #define CFG_SYS_CLK_KHZ     225000
 
 #define CFG_FFT_SIZE        2048U
 #define CFG_SPEC_HALF       (CFG_FFT_SIZE/2 + 1)
 #define CFG_HOP_SIZE        (CFG_FFT_SIZE/2)
+#define DRUM_LATENCY_OFFSET (CFG_HOP_SIZE / 2)  // パーカッション系発火タイミング= 512サンプル @ 24Khzz ≈ 20ms
 
-#define CFG_MASTER_GAIN     9000
+#define CFG_MASTER_GAIN      9000U
 
 #define CFG_GAIN_PIANO       1.2f
 #define CFG_GAIN_CHROMATIC   1.1f
@@ -29,7 +30,7 @@
 #define CFG_GAIN_SYNTH_FX    1.1f
 #define CFG_GAIN_ETHNIC      1.1f
 #define CFG_GAIN_PERC        1.1f
-#define CFG_GAIN_SFX         0.21f
+#define CFG_GAIN_SFX         0.7f
 #define CFG_GAIN_DRUM        0.21f
 
 #define CFG_AUDIO_PIN_P     2
@@ -50,13 +51,11 @@
 #define SONG_INTERVAL_TIME  2000U
 
 #define CFG_MIDI_DIR        "/midi"
-#define CFG_MAX_SONGS       128
+#define CFG_MAX_SONGS       256
 #define CFG_SONGLIST_FILE   "/SongList.txt"
 
-// ★ v7: lookahead はそのまま、KEEP_PAST は「解放までの margin」(短くて OK)
-//   ・解放条件は per-note (両発火済+end_ms 過去) なので margin は最小限で十分
-#define MIDI_LOOKAHEAD_MS   20000U
-#define MIDI_KEEP_PAST_MS   10U     // 各 Note の release margin (短くて良い)
+#define MIDI_LOOKAHEAD_MS   10000U  //先読み秒数
+#define MIDI_KEEP_PAST_MS   10U     //発火してからノーツが消えるまでの時間
 
 #define CFG_MIDI_NOTE_A0    21
 #define CFG_MIDI_NOTE_C8    108
