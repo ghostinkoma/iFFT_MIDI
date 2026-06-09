@@ -13,9 +13,8 @@
 //   → work_re[] が時間ドメイン信号 (1/Nスケール済み)
 // ================================================================
 #include <stdint.h>
+#include "config.h"
 
-#define FFT_N      2048
-#define FFT_LOG2   11
 
 // setup時に呼ぶ (ツイドル/ビット反転テーブル生成)
 void fft_q15_init();

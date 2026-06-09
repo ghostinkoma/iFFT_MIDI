@@ -8,10 +8,7 @@
 #include <Arduino.h>
 #include "config.h"
 #include "ifft_q15.h"
-
-#define PS_SINTAB       1024
-#define PS_SINTAB_BITS  10
-#define PS_HALF         (FFT_N/2 + 1)
+#include "config.h"
 
 void ps_init();
 void ps_note_on (uint8_t midi, uint8_t vel, uint16_t voice_idx, uint8_t channel, uint32_t end_ms);

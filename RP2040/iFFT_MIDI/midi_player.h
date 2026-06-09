@@ -11,14 +11,6 @@
 #include <LittleFS.h>
 #include "config.h"
 
-#ifndef MIDI_LOOKAHEAD_MS
-#define MIDI_LOOKAHEAD_MS 8000
-#endif
-
-#ifndef MIDI_KEEP_PAST_MS
-#define MIDI_KEEP_PAST_MS 500
-#endif
-
 struct Note {
     uint32_t start_ms;
     uint16_t duration_ms;

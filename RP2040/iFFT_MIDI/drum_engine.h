@@ -7,18 +7,7 @@
 // ============================================================================
 #pragma once
 #include <Arduino.h>
-
-#ifndef DRUM_VOICES
-#define DRUM_VOICES 48
-#endif
-
-// 同一ノートあたりの最大同時発音数
-//   1 : 完全choke (連打タイミング最優先、余韻なし)
-//   2 : 規定 (自然な余韻 + 連打時最古をchoke)
-//   3 : クラッシュ系を重ねたい時 (32分連打の高速ハイハット余韻保持にも有効)
-#ifndef DRUM_POLYPHONY_PER_NOTE
-#define DRUM_POLYPHONY_PER_NOTE 3
-#endif
+#include "config.h"
 
 void drum_engine_init();
 void drum_engine_note_on(uint8_t midi_note, uint8_t velocity);
