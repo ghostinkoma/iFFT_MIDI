@@ -15,7 +15,7 @@ SoundFont（GeneralUser GS）から生成した倍音データを用い、iFFT�
 - iFFTによる再合成音源
 - ドラム用IMA-ADPCM再生エンジン
 - RP2040単体動作（外付けRAMなし）
-
+- サウンド出力分解能１２ビット
 ---
 
 ## 主な特徴
@@ -27,16 +27,17 @@ SoundFont（GeneralUser GS）から生成した倍音データを用い、iFFT�
 - Sustain / Decayの自動判定
 
 ### ■ 音響処理
-- FFT窓サイズ：2048
+- FFT窓サイズ：4096
 - 倍音抽出：Goertzel法による周波数解析
 - RMS正規化によるラウドネス均一化
 - iFFTによる時間波形再構成
-
+-24KspsでiFFを行う。
+  
 ### ■ ドラム処理
 - IMA-ADPCM 4bit圧縮
 - 標準GMドラムキット対応（bank 128）
 - ストリーミング再生方式
-
+-最大同時発生は42迄
 ---
 
 ## 音源データ生成
@@ -60,9 +61,15 @@ SoundFont（GeneralUser GS）から生成した倍音データを用い、iFFT�
 - drum_data.cpp
 
 ---
-
-いずれも音切れなく再生可能。
-
+## テストベンチ用ファイル
+- 1812Overture.mid
+- Bond.mid
+- dq6-theme.mid
+- GraxyExpress999.mid
+- la-campanella-Franz-liszt-paganini.mid
+- Umi no Mieru Machi.mid
+- xi - FREEDOM DiVE↓.mid
+- いずれも音切れなく再生可能。
 ---
 
 ## ハードウェア要件
@@ -82,6 +89,10 @@ SoundFont（GeneralUser GS）から生成した倍音データを用い、iFFT�
 - SF2モジュレーション完全再現ではない（簡略化レンダリング）
 - 音色はGeneralUser GS依存
 - ドラムはADPCMベースの簡易波形再生
+
+##注意事項
+ -本プログラムは商用利用可能としますが、一切の責任を取りません。
+ -SFから中ちゅつした場合、SFのライセンス規定に従ってください。
 
 
 ---
