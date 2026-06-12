@@ -1,158 +1,156 @@
-# iFFT MIDI 
+# iFFT MIDI
 
-RP2040上で動作する、GM互換MIDI再生システムです。  
-SoundFont（GeneralUser GS）から生成した倍音データを用い、iFFTベースの音源合成を行います。
+A GM-compatible MIDI playback system operating on the RP2040.  
+It performs iFFT-based sound synthesis using overtone (harmonic) data generated from a SoundFont (GeneralUser GS).
 
 ---
 
-## 概要
+## Overview
 
-本プロジェクトは以下の構成で動作します。
+This project consists of the following components:
 
-- General MIDI (GM128) 対応再生エンジン
-- SoundFont（GeneralUser GS）からの音色解析ツールチェーン
-- 倍音抽出（Goertzel法）
-- iFFTによる再合成音源
-- ドラム用IMA-ADPCM再生エンジン
-- RP2040単体動作（外付けRAMなし）
-- サウンド出力分解能１２ビット
-- 開発環境 Arduino IDE2.3系
+- General MIDI (GM128) compatible playback engine
+- Timbre analysis toolchain from SoundFont (GeneralUser GS)
+- Harmonic extraction (Goertzel algorithm)
+- Sound synthesis re-constructed by iFFT
+- IMA-ADPCM playback engine for drums
+- Standalone operation on RP2040 (No external RAM required)
+- 12-bit sound output resolution
+- Development environment: Arduino IDE 2.3.x
   
 ---
 
-## ビルド方法
+## How to Build
 
-- 本リポジトリをクローンまたはzipファイルをダウンロード後、Arduino IDE2.3系でビルドと書き込みを行ってください。
-- ビルドの際以下の２点を設定してください。
-- ボードマネージャーからRaspberry pi picoを選択。（ボードの導入がまだの方はインストールを行ってから選択）
-- ツール→Flash Sizeの項目で Scketch 1MB FS 1Mを選択
-- 基本的にはRP2040へ他のサンプルスケッチを書き込みする要領と全く同じです。
-- すでにGeneralUser GSからサンプリングした音源がプロジェクトに含まれています。
-- 音源にこだわりたい方は/toolのツールチェーンから音源を抽出してください。
-- （GeneralUser GS以外の音源での抽出ははテストしていません）
+1. Clone this repository or download the ZIP file, then build and flash it using Arduino IDE 2.3.x.
+2. Please configure the following two settings during the build:
+   - Select **Raspberry Pi Pico** from the Board Manager. (If you haven't installed the board support yet, please install it before selecting).
+   - Go to **Tools** -> **Flash Size** and select **Sketch 1MB FS 1M**.
+3. The flashing process is identical to writing any other sample sketch to the RP2040.
+4. The project already includes sound sources sampled from GeneralUser GS.
+5. If you prefer to use custom sounds, please extract them using the toolchain located in the `/tool` directory.
+   - *Note: Extraction using sound sources other than GeneralUser GS has not been tested.*
   
 ---
 
-## MIDIファイルアップロード
-- little FSを利用しています導入がまだの方は以下のリポジトリからインストールを行ってください
-- https://github.com/earlephilhower/arduino-littlefs-upload
-- ctrl+shif+pで littlefsのアップロードの項目を選択
-- プロジェクトファイル内の /data にあるファイルがターゲットにアップロードされます。
-- midiファイルは　/data/midi　に格納してください。
-- /data　フォルダは全体で!MBを超えないようにしてください。
+## Uploading MIDI Files
+
+- This project uses LittleFS. If you haven't installed the uploader plugin yet, please install it from the following repository:
+  https://github.com/earlephilhower/arduino-littlefs-upload
+- Press `Ctrl + Shift + P` and select the LittleFS upload option.
+- Files located in the `/data` directory of the project will be uploaded to the target device.
+- Please store your MIDI files in `/data/midi`.
+- Ensure that the entire `/data` folder does not exceed **1MB**.
   
 ---
 
+## Key Features
 
+### ■ Sound Source Configuration
+- Supports up to 128 voices (Polyphonic playback)
+- Pianos are separated into individual voices per 88 keys.
+- Other GM timbres are sampled with octave/semitone strides.
+- Automatic detection of Sustain / Decay.
+- Maximum polyphony: 128 tones + 42 percussion voices.
+- The default sound source is sampled from **GeneralUser GS** by Christian Collins:
+  https://github.com/mrbumpy409/GeneralUser-GS
 
-## 主な特徴
-
-### ■ 音源構成
-- 128ボイス対応（ポリフォニック再生）
-- ピアノは88鍵単位で個別ボイス化
-- その他GM音色はオクターブ/半音ストライドでサンプリング
-- Sustain / Decayの自動判定
-- 最大同時発生数　128音＋パーカッション系42Voice
-- 音源のサンプリング元はGeneralUser GSを利用させてもらっています。
-- https://github.com/mrbumpy409/GeneralUser-GS
-
-### ■ 音響処理
-- FFT窓サイズ：2048
-- 倍音抽出：Goertzel法による周波数解析
-- RMS正規化によるラウドネス均一化
-- iFFTによる時間波形再構成
-- 26KspsでiFFを行う。
+### ■ Audio Processing
+- FFT Window Size: 2048
+- Harmonic Extraction: Frequency analysis via the Goertzel algorithm
+- Loudness equalization via RMS normalization
+- Time-domain waveform reconstruction via iFFT
+- iFFT processing runs at 26 Ksps.
   
-### ■ ドラム処理
-- IMA-ADPCM 4bit圧縮
-- 標準GMドラムキット対応（bank 128）
-- ストリーミング再生方式
--最大同時発生は42迄
----
-
-## 音源データ生成
-
-別途ツール `gm_extract` により生成されます。
-
-処理フロー：
-
-1. SF2（GeneralUser GS）読み込み
-2. 各プログラム・ノートをレンダリング
-3. アタック部を除外し定常成分を解析
-4. 倍音成分を抽出
-5. RMS正規化
-6. C++ヘッダへ変換
-
-出力：
-
-- voice_table.cpp
-- voice_table.h
-- voice_harm_data.h
-- drum_data.cpp
-
----
-## テストベンチ用ファイル
-- 1812Overture.mid
-- Bond.mid
-- dq6-theme.mid
-- GraxyExpress999.mid
-- la-campanella-Franz-liszt-paganini.mid
-- Umi no Mieru Machi.mid
-- xi - FREEDOM DiVE↓.mid
-- いずれも音切れなく再生可能。
----
-
-## ハードウェア要件
-
-- RP2040マイコン
-- PWM出力または簡易DAC
-- BTL出力
-- スピーカー（小型可）
-- カップリングコンデンサ程度の外付け部品
-- カップリングコンデンサは絶対に省略しないでください。最悪マイコンのGPIOが壊れる可能性があります。
-- SSD1306
-- ピンアサインはconfg.hで変更可能です。
-
-※外付けRAMは不要
+### ■ Drum Processing
+- IMA-ADPCM 4-bit compression
+- Standard GM Drum Kit support (Bank 128)
+- Streaming playback method
+- Maximum percussion polyphony: Up to 42 voices
 
 ---
 
-##　日本語表示対応
+## Sound Data Generation
 
-- SongList.txtに曲名・作者、midiファイル名を記載することで、曲の冒頭にOLEDへ表示可能。
-- 漢字JIS1及び2水準、記号。すべてプロジェクトに配備済みです。
-- 東雲フォント（１６ドット）を利用させてもらっています。
-- 視認性重視の為表示できる文字数の制限があります。
-- 詳しい記述方法およびサンプルはSongList.txtを参照してください。
+Sound data is generated separately using the `gm_extract` tool.
 
----
+**Processing Flow:**
+1. Load SF2 (GeneralUser GS).
+2. Render each program and note.
+3. Exclude the attack portion and analyze the steady-state components.
+4. Extract harmonic (overtone) components.
+5. Apply RMS normalization.
+6. Convert to C++ header files.
 
-## 制約
-
-- SF2モジュレーション完全再現ではない（簡略化レンダリング）
-- 音色はGeneralUser GS依存
-- ドラムはADPCMベースの簡易波形再生
-- いくつかのスピーカーで試験しましたが、スピーカーによっては十分な音圧が得られないことがあります。
-- その場合は外部アンプへ接続することをおすすめしますが、外部アンプへ接続する場合は
-- #define CFG_MASTER_GAIN
-- この値を下げるかアッテネート抵抗をいれてください。
-- いずれの場合でもカップリングコンデンサは必須です。
-
-##注意事項
- -本プログラムは商用利用可能としますが、一切の責任を取りません。
- -SFから抽出た場合、各SFのライセンス規定に従ってください。
-
----
- 
-##謝辞
- - GeneralUser GS作者　Christian Collins様
- - https://github.com/mrbumpy409/GeneralUser-GS
- - 東雲フォント作者　code4fukui様
- - https://github.com/code4fukui/shinonome-font
- - littlefs-upload作者　Earle F. Philhower III様
- - https://github.com/earlephilhower/arduino-littlefs-upload
+**Outputs:**
+- `voice_table.cpp`
+- `voice_table.h`
+- `voice_harm_data.h`
+- `drum_data.cpp`
 
 ---
 
+## Test Bench Files
 
+- `1812Overture.mid`
+- `Bond.mid`
+- `dq6-theme.mid`
+- `GraxyExpress999.mid`
+- `la-campanella-Franz-liszt-paganini.mid`
+- `Umi no Mieru Machi.mid`
+- `xi - FREEDOM DiVE↓.mid`
 
+*All files can be played back smoothly without any audio dropouts.*
+
+---
+
+## Hardware Requirements
+
+- RP2040 microcontroller
+- PWM output or a simple DAC
+- BTL output
+- Speaker (Small speakers are acceptable)
+- Minimal external components (such as a coupling capacitor)
+  - **CRITICAL:** Never omit the coupling capacitor. Failure to include it may destroy the microcontroller's GPIO pins.
+- SSD1306 OLED Display
+- Pin assignments can be modified in `config.h`.
+
+*\*No external RAM required.*
+
+---
+
+## Japanese Text Support
+
+- By listing the song title, artist, and MIDI filename in `SongList.txt`, you can display the song information on the OLED at the beginning of playback.
+- JIS Level 1 & 2 Kanji and symbols are fully integrated into the project.
+- It utilizes the **Shinonome Font** (16-dot bitmap font).
+- To prioritize readability, there is a limit on the number of characters that can be displayed.
+- Please refer to `SongList.txt` for detailed notation methods and examples.
+
+---
+
+## Limitations
+
+- It does not perfectly replicate SF2 modulations (uses simplified rendering).
+- Timbres are dependent on GeneralUser GS.
+- Drums rely on simplified waveform playback based on ADPCM.
+- Tested on several speakers, but some models may not yield sufficient sound pressure.
+  - In such cases, connecting to an external amplifier is recommended. 
+  - When connecting to an external amplifier, please lower the value of `#define CFG_MASTER_GAIN` or insert an attenuator resistor.
+  - **A coupling capacitor is strictly required in all configurations.**
+
+## Disclaimer & Notes
+
+- This software is available for commercial use. However, the author assumes **absolutely no liability or responsibility** for any damages arising from its use.
+- If you extract sounds from a SoundFont, you must comply with the license regulations of that specific SoundFont.
+
+---
+
+## Acknowledgments
+
+- **Christian Collins** (Author of GeneralUser GS)
+  https://github.com/mrbumpy409/GeneralUser-GS
+- **code4fukui** (Author of Shinonome Font)
+  https://github.com/code4fukui/shinonome-font
+- **Earle F. Philhower III** (Author of arduino-littlefs-upload)
+  https://github.com/earlephilhower/arduino-littlefs-upload
