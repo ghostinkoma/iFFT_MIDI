@@ -27,6 +27,7 @@
 #include "song_list.h"
 #include "palette_synth.h"
 #include "drum_engine.h"
+#include "text_render.h"
 
 // ================================================================
 // グローバル
@@ -123,10 +124,18 @@ static void dispatch_events() {
 
         uint16_t vi = voice_idx_from_note(ev.note, ev.program);
 
-        if (ev.velocity > 0)
-            ps_note_on(ev.note, ev.velocity, vi, ev.channel, millis() + (uint32_t)ev.duration_ms);
-        else
+        if (ev.velocity > 0) {
+            // [BUGFIX] ev.duration_ms==65535 は「終端未確定(ACTIVE)」。
+            //   そのまま渡すと end_ms = now + 65535ms = 65秒後の自動リリースになり、
+            //   note-off を取りこぼした音が数十秒鳴り続ける。
+            //   確定済みの長さだけ信頼し、未確定/異常長は安全側で 30秒に頭打ち。
+            //   (正規ノートは明示 note-off が先に来るので、この上限は実質暴走保護)
+            uint32_t dur_ms = ev.duration_ms;
+            if (dur_ms >= NOTE_DURATION_ACTIVE || dur_ms > 30000u) dur_ms = 30000u;
+            ps_note_on(ev.note, ev.velocity, vi, ev.channel, millis() + dur_ms);
+        } else {
             ps_note_off(ev.note, ev.channel);
+        }
     }
 }
 
@@ -212,16 +221,21 @@ static void draw_notes() {
 
 static void draw_menu() {
     display.clearDisplay();
-    display.setTextColor(SSD1306_WHITE); display.setTextSize(1);
-    display.setCursor(0,0); display.println("-- SELECT --");
-    int total=g_songlist.count();
-    int start=max(0,g_song_idx-2), end=min(total,start+5);
-    for (int i=start;i<end;i++){
-        display.setCursor(0,12+(i-start)*10);
-        display.print(i==g_song_idx?"> ":"  ");
-        char b[18]; strncpy(b,g_songlist.get(i).title,17); b[17]='\0';
-        for (int k=0; b[k]; k++) if ((unsigned char)b[k] >= 0x80) b[k] = '_';
-        display.print(b);
+    text_set_color(SSD1306_WHITE);
+    text_draw(0, 0, "-- SELECT --");                  // 行0 (英数8x16)
+
+    int total = g_songlist.count();
+    // 16px行は画面に3行入る (16/32/48)。選択を中央寄りに。
+    int start = g_song_idx - 1; if (start < 0) start = 0;
+    if (start > total - 3) start = (total > 3) ? total - 3 : 0;
+    int shown = (total - start < 3) ? (total - start) : 3;
+
+    for (int i = 0; i < shown; i++) {
+        int idx = start + i;
+        int y   = 16 + i * 16;
+        int x   = text_draw(0, y, (idx == g_song_idx) ? ">" : " ");
+        x       = text_draw(x, y, " ");
+        text_draw_clip(x, y, g_songlist.get(idx).title, CFG_PHYS_W - x);
     }
     display.display();
 }
@@ -244,14 +258,18 @@ static void start_song(int idx) {
     // 前の曲のドラムボイスが鳴り続けるバグを防ぐ
     drum_engine_init();
 
-    // 曲開始時の情報表示
+    // 曲開始時の情報表示 (4行/各16px)
+    //   1-2行目: タイトル (songlistの空白を保持。"\n"指定で強制改行/無ければ幅折返し, 2行でクリップ)
+    //   3行目  : Author の値 (128px = 全角8/半角16 でクリップ)
+    //   4行目  : MIDI ファイル名 (basename, 128px でクリップ)
     display.clearDisplay();
-    display.setTextColor(SSD1306_WHITE);
-    display.setTextSize(1);
-    display.setCursor(0,0); display.print("Playing: #"); display.println(g_song_idx + 1);
-    char tb[22]; strncpy(tb, info.title, 21); tb[21]='\0';
-    for (int k=0; tb[k]; k++) if ((unsigned char)tb[k] >= 0x80) tb[k] = '_';
-    display.setCursor(0,16); display.println(tb);
+    text_draw_wrap(0, 0, info.title, CFG_PHYS_W, 16, 2);
+    text_draw_clip(0, 32, info.author, CFG_PHYS_W);
+    {
+        const char* fn = strrchr(info.midi_path, '/');
+        fn = fn ? fn + 1 : info.midi_path;
+        text_draw_clip(0, 48, fn, CFG_PHYS_W);
+    }
     display.display();
     g_showing_info = true;
     g_info_start   = millis();
@@ -299,6 +317,9 @@ void setup() {
         display.setCursor(15,24); display.println("iFFT Orgel v3");
         display.display();
     }
+
+    // UTF-8 テキスト描画(日本語等)を既存 Adafruit バッファ上で有効化
+    text_init(display);
 
     pinMode(CFG_BTN_NEXT, INPUT_PULLUP);
     pinMode(CFG_BTN_PLAY, INPUT_PULLUP);

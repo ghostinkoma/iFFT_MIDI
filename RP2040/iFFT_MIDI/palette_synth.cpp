@@ -158,9 +158,14 @@ void ps_note_on(uint8_t midi, uint8_t vel, uint16_t voice_idx, uint8_t channel, 
 }
 
 void ps_note_off(uint8_t midi, uint8_t channel) {
+    // [BUGFIX] アタック中(st==1)の note-off を取りこぼさない。
+    //   旧: st==2 のみ → note-on 直後の密な off(スタッカート/連打/リトリガ)を
+    //       黙って捨て、その音が end_ms(最大65秒)まで居残る = 鳴りっぱなし。
+    //   新: st==1(アタック) も st==2(サスティン) も離鍵としてリリースへ。
     for (int i=0; i<CFG_MAX_POLYPHONY; i++)
         if (notes[i].used && notes[i].midi==midi &&
-            notes[i].channel==channel && notes[i].st==2)
+            notes[i].channel==channel &&
+            (notes[i].st==1 || notes[i].st==2))
             notes[i].st=3;
 }
 
