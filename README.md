@@ -16,7 +16,31 @@ SoundFont（GeneralUser GS）から生成した倍音データを用い、iFFT�
 - ドラム用IMA-ADPCM再生エンジン
 - RP2040単体動作（外付けRAMなし）
 - サウンド出力分解能１２ビット
+- 開発環境 Arduino IDE2.3系
+  
 ---
+
+## ビルド方法
+
+- 本リポジトリをクローンまたはzipファイルをダウンロード後、Arduino IDEのビルドと書き込みを行ってください。
+- ビルドの際以下の２点を設定してください。
+- ボードマネージャーからRaspberry pi picoを選択。（ボードの導入がまだの方はインストールを行ってから選択）
+- ツール→Flash Sizeの項目で Scketch 1MB FS 1Mを選択
+- 基本的にはRP2040へ他のサンプルスケッチを書き込みする要領と全く同じです。
+  
+---
+
+## MIDIファイルアップロード
+- little FSを利用しています導入がまだの方は以下のリポジトリからインストールを行ってください
+- https://github.com/earlephilhower/arduino-littlefs-upload
+- ctrl+shif+pで littlefsのアップロードの項目を選択
+- プロジェクトファイル内の /data にあるファイルがターゲットにアップロードされます。
+- midiファイルは　/data/midi　に格納してください。
+- /data　フォルダは全体で!MBを超えないようにしてください。
+  
+---
+
+
 
 ## 主な特徴
 
