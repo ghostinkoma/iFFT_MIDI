@@ -114,7 +114,11 @@ SoundFont（GeneralUser GS）から生成した倍音データを用い、iFFT�
 ##注意事項
  -本プログラムは商用利用可能としますが、一切の責任を取りません。
  -SFから中ちゅつした場合、SFのライセンス規定に従ってください。
-
+##謝辞
+ - GeneralUser GS作者　Christian Collins様
+ - https://github.com/mrbumpy409/GeneralUser-GS
+ - 東雲フォント作者　code4fukui様
+ - https://github.com/code4fukui/shinonome-font
 
 ---
 
