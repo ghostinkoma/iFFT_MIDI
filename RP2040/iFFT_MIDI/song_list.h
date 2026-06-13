@@ -9,7 +9,7 @@
 //   Arranger="編曲者"   (省略/NULL時: 表示しない)
 // ================================================================
 #include <Arduino.h>
-#include <LittleFS.h>
+#include <FatFS.h>
 #include "config.h"
 
 struct SongInfo {

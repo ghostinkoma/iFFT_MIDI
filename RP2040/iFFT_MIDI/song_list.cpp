@@ -87,7 +87,7 @@ int SongList::load(const char* midi_dir) {
     static MF midi_files[MAX];
     int midi_count=0;
 
-    Dir dir=LittleFS.openDir(midi_dir);
+    Dir dir=FatFS.openDir(midi_dir);
     while (dir.next()&&midi_count<MAX) {
         String fname=dir.fileName();
         if (fname.endsWith(".mid")||fname.endsWith(".MID")) {
@@ -101,7 +101,7 @@ int SongList::load(const char* midi_dir) {
     DBG_PRINTF("[songlist] %d midi files\n", midi_count);
 
     // SongList.txt なし
-    if (!LittleFS.exists(CFG_SONGLIST_FILE)) {
+    if (!FatFS.exists(CFG_SONGLIST_FILE)) {
         DBG_PRINTLN("[songlist] no SongList.txt");
         for (int i=0;i<midi_count;++i) {
             SongInfo& s=_songs[_count++];
@@ -115,7 +115,7 @@ int SongList::load(const char* midi_dir) {
         return _count;
     }
 
-    File f=LittleFS.open(CFG_SONGLIST_FILE,"r");
+    File f=FatFS.open(CFG_SONGLIST_FILE,"r");
     if (!f) return 0;
 
     char cur_hash[64]={}, cur_title[48]={};

@@ -8,7 +8,7 @@
 //   100msにすることでフレーム遅れによるノーツ取りこぼしを防ぐ。
 // ============================================================================
 #include <Arduino.h>
-#include <LittleFS.h>
+#include <FatFS.h>
 #include "config.h"
 
 struct Note {

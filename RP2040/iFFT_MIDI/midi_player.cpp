@@ -36,7 +36,7 @@ static uint32_t read_varlen(File& f) {
 // ============================================================================
 bool MidiPlayer::_open_song(const char* path) {
     _close_song();
-    _file = LittleFS.open(path, "r");
+    _file = FatFS.open(path, "r");
     if (!_file) return false;
     _file_open = true;
     return true;

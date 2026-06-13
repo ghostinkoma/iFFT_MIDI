@@ -6,7 +6,7 @@
 
 //System prams
 #define CFG_SYS_CLK_KHZ     225000
-#define CFG_SAMPLE_RATE     28000U
+#define CFG_SAMPLE_RATE     24000U
 #define CFG_MAX_POLYPHONY   128
 #define CFG_MAX_SONGS       128
 
@@ -42,7 +42,7 @@
 #define DRUM_LATENCY_OFFSET (CFG_HOP_SIZE / 2)  // = 512サンプル @ 24kHz ≈ 21ms (Hann窓中央=hop半分に整合)
 
 //Sound prams
-#define CFG_MASTER_GAIN      00U
+#define CFG_MASTER_GAIN      9000U
 
 #define CFG_GAIN_PIANO       1.2f
 #define CFG_GAIN_CHROMATIC   1.1f
@@ -98,6 +98,23 @@
 #define JPN_FONT_SHINONOME  1
 #define JPN_FONT            JPN_FONT_SHINONOME
 
+//USB mass-storage (PCから直接 MIDI / SongList.txt を編集)
+//  1: 内蔵フラッシュFAT を USBメモリとしてPCへ公開 (FatFS + FatFSUSB)
+//     ※ 初回起動で内蔵FSは FAT へ自動再フォーマット(既存LittleFSデータは消去)
+//        以後はPC上のドライブに /midi フォルダを作りMIDIを置く
+//  0: 公開しない (FatFSは使うがUSBドライブにはしない)
+#define USE_USB_MSC         1
+
+//USB MIDI 入力 (PCからのMIDIを内蔵シンセで鳴らす外部音源モード)
+//  1: 既定USBスタックに USB MIDI I/F を追加 (MSCと共存)。MIDI受信中は外部音源化。
+//  0: 無効
+//  ※ Tools>USB Stack は「Pico SDK」(既定)のまま。Adafruit TinyUSB に変えると
+//     FatFSUSB が使えなくなるので変更しないこと。
+#define USE_USB_MIDI        1
+
+//  USB MIDI ポート名 (DAW/デバイスマネージャに出る名前 = iInterface文字列)
+#define USB_MIDI_NAME       "Pico"
+
 //Control button pin asine prams
 #define CFG_BTN_PLAY        14
 #define CFG_BTN_NEXT        15
@@ -105,11 +122,17 @@
 //Play mode prams
 #define CFG_AUTO_START      true
 #define CFG_REPEAT_MODE     true
-#define SONG_INTERVAL_TIME  4000U
+#define SONG_INTERVAL_TIME  2000U
 
 //Drectry prams
 #define CFG_MIDI_DIR        "/midi"
 #define CFG_SONGLIST_FILE   "/SongList.txt"
+
+//USB Mass Storage (FatFSUSB) prams
+//   1: PC接続時に 1MB FatFS領域を USBメモリとして公開 (MIDI/SongList.txt を直接編集)
+//      ※ ストレージは LittleFS では不可。FatFS 必須 (PCはLittleFSを読めない)
+//   0: 無効 (従来どおり内部FSのみ)
+#define USE_USB_STORAGE     1
 
 //midi_player
 #define MIDI_LOOKAHEAD_MS   10000U  //先読み秒数
