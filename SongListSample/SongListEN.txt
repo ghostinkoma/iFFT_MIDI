@@ -1,0 +1,49 @@
+:This file defines the strings displayed on the OLED at the beginning of each song.
+;
+;FilenameHash= xxxx.mid
+;The MIDI filename to link with the display
+;Title="Title"
+:Author="Author"
+;Make sure to enclose these items in double quotes, like "Title"
+
+;Display Rules
+;Each line can display up to 8 full-width characters or 16 half-width characters.
+;The title is displayed on the first and second lines.
+;To insert a line break in the title, use \n.
+;The author is displayed on the third line, up to 8 full-width or 16 half-width characters; any text beyond this limit will not be displayed.
+;The fourth line displays the MIDI filename.
+
+; 1812 Overture
+FilenameHash=1812Overture.mid
+Title="Overture 1812"
+Author="Tchaikovsky"
+
+; 007 James Bond
+FilenameHash=Bond.mid
+Title="007 From\nJames Bond"
+Author="Monty Norman"
+
+; Dragon Quest VI
+FilenameHash=dq6-theme.mid
+Title="Dragon Quest\nVI Overture"
+Author="Koichi Sugiyama"
+
+; Galaxy Express 999
+FilenameHash=GraxyExpress999.mid
+Title="Galaxy Exp. 999"
+Author="Yukihide Takekawa"
+
+; La Campanella Franz Liszt
+FilenameHash=la-campanella-Franz-liszt-paganini.mid
+Title="La Campanella"
+Author="Franz Liszt"
+
+; Kiki's Delivery Service (A Town with an Ocean View)
+FilenameHash=Umi no Mieru Machi.mid
+Title="A Town with an\nOcean View"
+Author="Joe Hisaishi"
+
+; FREEDOM DiVE↓
+FilenameHash=xi - FREEDOM DiVE↓.mid
+Title="FREEDOM DiVE↓"
+Author="xi"
