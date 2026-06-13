@@ -113,7 +113,9 @@
 #define USE_USB_MIDI        1
 
 //  USB MIDI ポート名 (DAW/デバイスマネージャに出る名前 = iInterface文字列)
-#define USB_MIDI_NAME       "Pico"
+//この文字列を変更を反映させるためには、Windowsのデバイスマネージャーより古いデバイス名のアンインストールをおこなったあと、
+//RP2040をいったんUSBから抜いてもう一度接続してください。
+#define USB_MIDI_NAME       "iFFT Koma Sound"
 
 //Control button pin asine prams
 #define CFG_BTN_PLAY        14

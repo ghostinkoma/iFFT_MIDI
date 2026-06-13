@@ -37,9 +37,13 @@ static void midi_desc_cb(int itf, uint8_t *dst, int len, void *param) {
 void usb_midi_begin() {
     for (int i = 0; i < 16; i++) s_prog[i] = 0;
 
+    // 多くのOS(特にWindows)は MIDIポート名に製品名(iProduct)を使う。
+    // iInterface だけでは反映されないので、製品名も設定する。
+    USB.setProduct(USB_MIDI_NAME);
+
     // USB記述子に MIDI(2 I/F) を登録 (FatFSUSB の MSC 登録と同じ流儀)。
     USB.disconnect();
-    s_strID = USB.registerString(USB_MIDI_NAME);   // ポート名を登録
+    s_strID = USB.registerString(USB_MIDI_NAME);   // ポート名(iInterface)も登録
     s_epIn  = USB.registerEndpointIn();
     s_epOut = USB.registerEndpointOut();
     s_itf = USB.registerInterface(2, midi_desc_cb, nullptr,
