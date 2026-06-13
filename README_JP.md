@@ -34,15 +34,18 @@ SoundFont（GeneralUser GS）から生成した倍音データを用い、iFFT�
 ---
 
 ## MIDIファイルアップロード
-- little FSを利用しています導入がまだの方は以下のリポジトリからインストールを行ってください
-- https://github.com/earlephilhower/arduino-littlefs-upload
-- ctrl+shif+pで littlefsのアップロードの項目を選択
-- プロジェクトファイル内の /data にあるファイルがターゲットにアップロードされます。
-- midiファイルは　/data/midi　に格納してください。
-- /data　フォルダは全体で!MBを超えないようにしてください。
+- Rasberrry pi pico 又は互換機にアップロードすると、USBメモリとして認識されます。
+- ディスクサイズはRasberry pi pico の場合ディスクサイズは1MBです。
+- ドライブを確認した上でFATにてフォーマットをおこなってください。
+- ドライブ直下に midi の名称のフォルダ作成してください。
+- このmidiフォルダ配下にmidiファイルを配備すると再生対象となります
+- このフォルダ名を変更したい場合config.hのCFG_MIDI_DIRで指定することが可能です。
+- PCと通信ができる状態では場合はストレージとして認識されます。
+- 注意！自動演奏させる場合、通信ケーブルではなく、電源のみを供給するケーブルを使用してください。
+- SongList.txtはドライブ直下に配備することでOLEDに曲の冒頭タイトル/作者を表示させることが可能です。
+- このファイル名を変更したい場合は、config.hのCFG_SONGLIST_FILE　の値を変更してください。
   
 ---
-
 
 
 ## 主な特徴
@@ -71,7 +74,7 @@ SoundFont（GeneralUser GS）から生成した倍音データを用い、iFFT�
 ---
 
 ## 音源データ生成
-
+この作業はSoundFontをカスタマイズする場合です。
 別途ツール `gm_extract` により生成されます。
 
 処理フロー：
@@ -127,6 +130,13 @@ SoundFont（GeneralUser GS）から生成した倍音データを用い、iFFT�
 
 ---
 
+##　簡易GM互換外部MIDI音源機能
+
+- PC接続時、外部MIDI音源として利用することが可能です。
+- RP2040の制約上簡易実装なので、音質やレイテンシはあくまでおまけ機能と考えてください。
+
+---
+
 ## 制約
 
 - SF2モジュレーション完全再現ではない（簡略化レンダリング）
@@ -149,8 +159,6 @@ SoundFont（GeneralUser GS）から生成した倍音データを用い、iFFT�
  - https://github.com/mrbumpy409/GeneralUser-GS
  - 東雲フォント作者　code4fukui様
  - https://github.com/code4fukui/shinonome-font
- - littlefs-upload作者　Earle F. Philhower III様
- - https://github.com/earlephilhower/arduino-littlefs-upload
 
 ---
 
