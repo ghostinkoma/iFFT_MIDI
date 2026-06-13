@@ -1,0 +1,88 @@
+# iFFT Orgel ソースコード構成
+
+## 音源エンジン
+### iFFTパレット加算合成 (palette_synth.cpp/.h)
+- 機能: iFFTとパレット加算合成を用いた高品質音源の生成
+- 関数:
+  - `ps_init()`: 初期化
+  - `ps_note_on()`/`ps_note_off()`: ノートオン/オフ処理
+  - `ps_all_off()`: 全ノートオフ
+  - `ps_paint_palette()`: パレットの描画
+  - `ps_render_block()`: 音声ブロックのレンダリング
+- 定数:
+  - `CFG_MAX_POLYPHONY`: 最大同時発音数
+- グローバル変数:
+  - `ps_fill_seq`/`ps_cons_seq`: 描画/消費シーケンス番号
+  - `ps_active`: アクティブなボイス数
+
+### ドラムエンジン (drum_engine.cpp/.h)
+- 機能: ADPCM 4bitドラム音源の再生
+- 関数:
+  - `drum_engine_init()`: 初期化
+  - `drum_engine_note_on()`: ドラムノートオン処理
+  - `drum_engine_mix()`: ドラム音源のミキシング
+  - `drum_engine_active_count()`: アクティブなドラムボイス数の取得
+
+## MIDI再生
+### MIDIプレイヤー (midi_player.cpp/.h)
+- 機能: スタンダードMIDIファイル(SMF)の再生
+- クラス: `MidiPlayer`
+  - `load_path()`: MIDIファイルのロード
+  - `start()`/`stop()`: 再生の開始/停止
+  - `pause()`/`resume()`: 再生の一時停止/再開
+  - `tick()`: 再生の進行
+  - `is_playing()`/`is_finished()`: 再生状態の取得
+- 構造体: `MidiEvent`
+  - MIDIイベントを表現
+  - `timestamp`, `status`, `data1`, `data2`, `sysex_data`
+
+### 曲リスト管理 (song_list.cpp/.h)
+- 機能: 再生可能な曲のリスト管理
+- クラス: `SongList`
+  - `load()`: 曲リストのロード
+  - `count()`: 曲数の取得
+  - `get()`: 曲情報の取得
+- 構造体: `SongInfo`
+  - 曲の情報を表現
+  - `midi_path`, `title`, `author`, `arranger`, `has_title`, `has_arranger`
+
+## USBデバイスクラス
+### USBマスストレージ (usb_storage.cpp/.h)
+- 機能: 内蔵フラッシュをUSBマスストレージとして公開
+- 関数:
+  - `usb_storage_begin()`: FatFSとUSB公開の初期化
+  - `usb_pc_connected()`: PCのマウント状態の取得
+  - `usb_set_fs_busy()`/`usb_take_wants_mount()`/`usb_take_unplugged()`: PCとの排他制御
+
+### USB MIDI (usb_midi.cpp/.h)
+- 機能: USB MIDI入力の処理
+- 関数:
+  - `usb_midi_begin()`: USB MIDI I/Fの初期化
+  - `usb_midi_is_active()`: MIDI受信状態の取得
+  - `usb_midi_poll()`: MIDI入力の処理
+  - `usb_midi_all_off()`: 全ノートオフ
+
+## テキストレンダリング (text_render.cpp/.h)
+- 機能: UTF-8テキストの描画（日本語対応）
+- 関数:
+  - `text_init()`: 初期化
+  - `text_set_color()`: 色の設定
+  - `text_draw()`/`text_width()`: テキストの描画/幅の取得
+  - `text_draw_clip()`/`text_draw_wrap()`: クリッピング/折り返し描画
+
+## 設定 (config.h)
+- 各種設定値の定義
+  - `CFG_SAMPLE_RATE`: サンプリングレート
+  - `CFG_MAX_POLYPHONY`: 最大同時発音数
+  - `CFG_MAX_SONGS`: 最大曲数
+  - `DISPLAY_LANG`: 表示言語
+  - `JPN_FONT`: 日本語フォント選択
+  - `USE_USB_MSC`/`USE_USB_MIDI`: USBデバイスクラスの有効化
+
+## メイン (iFFT_MIDIl.ino)
+- `setup()`: 初期化処理
+- `loop()`: メインループ
+  - USB関連の処理
+  - MIDI再生の進行
+  - ボタン入力の処理
+  - 画面描画の更新
